@@ -30,32 +30,74 @@ export function Chat({ sessionId, history }: { sessionId?: string; history: Mess
   }
 
   return (
-    <div className="flex flex-1 flex-col">
-      <div className="flex-1 space-y-4 overflow-y-auto p-6">
-        {messages.map((message, i) => (
-          <div
-            key={i}
-            className={`max-w-2xl whitespace-pre-wrap rounded-lg p-3 ${
-              message.role === "user" ? "ml-auto bg-blue-100" : "bg-gray-100"
-            }`}
-          >
-            {message.content}
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {messages.length === 0 && !waiting ? (
+          <div className="flex h-full flex-col items-center justify-center px-6 py-10 text-center">
+            <span className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-accent text-white shadow-sm">
+              <svg viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 3.75h7.2L19 8.4V20.25H7z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.2 3.75V8.4H19" />
+                <path strokeLinecap="round" d="M9.5 12.5h6M9.5 16h4" />
+              </svg>
+            </span>
+            <h2 className="text-2xl font-semibold tracking-tight">Ask about company documents</h2>
+            <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted">
+              ChatRAG reads your company&apos;s documents and answers in plain language. Try a policy, a process, or a document by name.
+            </p>
           </div>
-        ))}
-        {waiting && <p className="text-gray-500">Thinking...</p>}
+        ) : (
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6 sm:px-6">
+            {messages.map((message, i) => {
+              const fromUser = message.role === "user";
+              return (
+                <div key={i} className={`flex ${fromUser ? "justify-end" : "justify-start"}`}>
+                  <div className="max-w-[85%] sm:max-w-[36rem]">
+                    <p className={`mb-1.5 text-xs font-medium text-muted ${fromUser ? "text-right" : ""}`}>
+                      {fromUser ? "You" : "ChatRAG"}
+                    </p>
+                    <div
+                      className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-[15px] leading-6 ${
+                        fromUser
+                          ? "rounded-br-md bg-accent text-white"
+                          : "rounded-bl-md border border-line bg-card text-foreground shadow-sm"
+                      }`}
+                    >
+                      {message.content}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {waiting && (
+              <p className="flex items-center gap-2 text-sm text-muted">
+                <span className="size-2 animate-pulse rounded-full bg-accent" aria-hidden="true" />
+                Looking through the documents…
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
-      <form onSubmit={send} className="flex gap-2 border-t p-4">
-        <input
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          placeholder="Ask a question..."
-          aria-label="Question"
-          className="flex-1 rounded border px-3 py-2"
-        />
-        <button disabled={!question || waiting} className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50">
-          Send
-        </button>
+      <form
+        onSubmit={send}
+        className="shrink-0 border-t border-line bg-sidebar/90 px-3 pt-3 shadow-[0_-8px_24px_rgb(30_27_22/0.04)] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6"
+      >
+        <div className="mx-auto flex max-w-3xl items-center gap-2">
+          <input
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="Ask a question…"
+            aria-label="Question"
+            className="min-w-0 flex-1 rounded-xl border border-line bg-card px-4 py-3 text-base text-foreground outline-none placeholder:text-muted/80 focus:border-accent focus:ring-4 focus:ring-accent/15"
+          />
+          <button
+            disabled={!question || waiting}
+            className="rounded-xl bg-accent px-4 py-3 text-sm font-medium text-white hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Send
+          </button>
+        </div>
       </form>
     </div>
   );
